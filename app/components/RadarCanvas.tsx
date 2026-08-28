@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type MutableRefObject } from "react";
-import { BIN_COUNT, type RadarFrame } from "@/lib/radar";
+import { BIN_COUNT, FRESH_MS, type RadarFrame } from "@/lib/radar";
 
 const CRT = {
   bg: "#050507",
@@ -16,8 +16,6 @@ const CRT = {
   objectFar: "#00ff41",
   hud: "#9ad6a4",
 } as const;
-
-const FRESH_MS = 4000;
 
 export type RadarCanvasProps = {
   frameRef: MutableRefObject<RadarFrame>;
@@ -271,7 +269,7 @@ export function RadarCanvas({ frameRef, maxRange }: RadarCanvasProps) {
     <canvas
       ref={canvasRef}
       className="h-full w-full"
-      aria-label="Ultrasonic radar sweep"
+      aria-label="Ultrasonic sonar sweep"
     />
   );
 }

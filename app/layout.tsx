@@ -1,22 +1,25 @@
 import type { Metadata } from "next";
-import { Bricolage_Grotesque, JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const bricolage = Bricolage_Grotesque({
+const bricolage = localFont({
+  src: "./fonts/BricolageGrotesque-latin-wght.woff2",
   variable: "--font-bricolage",
-  subsets: ["latin"],
-  axes: ["opsz"],
+  weight: "200 800",
+  display: "swap",
 });
 
-const jetbrains = JetBrains_Mono({
+const jetbrains = localFont({
+  src: "./fonts/JetBrainsMono-latin-wght.woff2",
   variable: "--font-jetbrains",
-  subsets: ["latin"],
+  weight: "100 800",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Radar Playground — Robotics Club VITC",
+  title: "Sonar Playground — Robotics Club VITC",
   description:
-    "Live ultrasonic radar by Robotics Club VITC: connect an Arduino, stream angle and distance, watch the sweep.",
+    "Live ultrasonic sonar by Robotics Club VITC: connect an Arduino, stream angle and distance, watch the sweep.",
   icons: {
     icon: [{ url: "/rclogo.webp", type: "image/webp" }],
     apple: [{ url: "/rclogo.webp", type: "image/webp" }],

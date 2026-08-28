@@ -4,8 +4,8 @@ import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   applyPing,
-  countObjects,
   createRadarFrame,
+  nearestContact,
   RANGE_PRESETS,
   sampleDemo,
   type RadarFrame,
@@ -29,7 +29,9 @@ export function RadarPlayground() {
   const [maxRange, setMaxRange] = useState<(typeof RANGE_PRESETS)[number]>(40);
   const [angle, setAngle] = useState(90);
   const [distance, setDistance] = useState(0);
-  const [objects, setObjects] = useState(0);
+  const [nearest, setNearest] = useState<{ angle: number; distance: number } | null>(
+    null,
+  );
   const [pps, setPps] = useState(0);
   const [log, setLog] = useState<string[]>([]);
 
@@ -60,7 +62,7 @@ export function RadarPlayground() {
       uiAtRef.current = now;
       setAngle(frame.angle);
       setDistance(frame.distance);
-      setObjects(countObjects(frame, maxRangeRef.current, now));
+      setNearest(nearestContact(frame, maxRangeRef.current, now));
       setPps(pingTimesRef.current.length);
     }
 
@@ -114,7 +116,7 @@ export function RadarPlayground() {
     frame.hitAt.fill(0);
     frame.distance = 0;
     setDistance(0);
-    setObjects(0);
+    setNearest(null);
     setLog([]);
   }, []);
 
@@ -137,15 +139,16 @@ export function RadarPlayground() {
             width={48}
             height={48}
             priority
+            unoptimized
             className="h-full w-full object-cover"
           />
         </div>
         <div className="min-w-0 flex-1">
           <h1 className="text-[clamp(1.35rem,3vw,2rem)] font-bold leading-none tracking-tight text-foreground">
-            Radar Playground
+            Sonar Playground
           </h1>
           <p className="mt-1 truncate text-xs font-medium text-muted-foreground sm:text-sm">
-            by Robotics Club VITC · servo angle + ultrasonic distance
+            by Robotics Club VITC 
           </p>
         </div>
         <button type="button" onClick={clearTraces} className={`${btn} shrink-0`}>
@@ -157,7 +160,7 @@ export function RadarPlayground() {
         <section className={`${panel} flex min-h-0 min-w-0 flex-col gap-3 lg:col-span-8 lg:h-full`}>
           <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">
             <h2 className="text-base font-semibold tracking-tight sm:text-lg">
-              Radar
+              Sonar
             </h2>
             <span className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1 font-mono text-xs font-semibold text-muted-foreground">
               <span
@@ -191,7 +194,7 @@ export function RadarPlayground() {
             {!serial.supported ? (
               <p className="rounded-xl bg-muted px-3 py-2 text-sm text-muted-foreground">
                 Web Serial needs Chrome or Edge on this computer. Demo sweep still
-                runs so you can see the radar.
+                runs so you can see the sonar.
               </p>
             ) : null}
 
@@ -246,7 +249,7 @@ export function RadarPlayground() {
 
             <p className="text-xs leading-relaxed text-muted-foreground">
               Arduino should print <span className="font-mono text-foreground">angle,distance.</span>{" "}
-              — same format as the classic ultrasonic + servo radar. Sketch is in{" "}
+              — same format as the classic ultrasonic + servo sonar. Sketch is in{" "}
               <span className="font-mono">arduino/radar.ino</span>.
             </p>
           </section>
@@ -288,7 +291,14 @@ export function RadarPlayground() {
                 label="Distance"
                 value={distance > 0 ? `${distance.toFixed(0)} cm` : "—"}
               />
-              <Stat label="Objects" value={`${objects}`} />
+              <Stat
+                label="Nearest"
+                value={
+                  nearest
+                    ? `${nearest.distance.toFixed(0)} cm · ${nearest.angle.toFixed(0)}°`
+                    : "—"
+                }
+              />
               <Stat label="Pings" value={`${pps} /s`} />
             </div>
             <div className="mt-1 min-h-0 flex-1 overflow-hidden rounded-xl bg-muted px-3 py-2">

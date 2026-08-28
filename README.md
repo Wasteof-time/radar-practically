@@ -1,36 +1,118 @@
-# Radar Playground
+# radar-practically
 
-Live ultrasonic radar for Robotics Club VITC. Connect an Arduino over USB, stream **angle** and **distance**, and watch the sweep on the website.
+**make this, run this, and flex with your peers.**
 
-Same stack and look as the PWM playground: Next.js, React, Tailwind, CRT-style canvas.
+Live ultrasonic radar in the browser. Sweep a servo, ping an HC-SR04, stream `angle,distance.` over USB, watch the CRT-ish scan on the site.
 
-## Run the site
+Built by **wasteof-time (JCKAWIN)** for Robotics Club VITC.
+
+**Live:** [sonar-rc.netlify.app](https://sonar-rc.netlify.app)
+
+No Arduino on you? Open the site in any browser, leave **Demo on**, and still look like you know what a radar is.
+
+Chrome or Edge is required for **Connect Arduino** (Web Serial). Safari / Firefox can still run the demo sweep.
+
+---
+
+## What you get
+
+- Next.js playground that draws a 180° radar from live pings
+- Demo sweep so the page is never a dead screen
+- Web Serial hookup to a real Arduino Uno R3
+- Range scale: 40 / 100 / 200 / 400 cm
+- Live readouts: angle, distance, object count, pings/sec
+- Sketch in `arduino/radar.ino` that already speaks the format the site expects
+
+---
+
+## Hardware
+
+| Piece | Pin / note |
+| --- | --- |
+| Arduino Uno R3 | USB to the laptop running Chrome / Edge |
+| Servo (SG90 or similar) | signal → **D12** |
+| HC-SR04 ultrasonic | TRIG → **D10**, ECHO → **D11** |
+| Power | 5V + GND. If the servo jitters, give it its **own 5V** and tie grounds together |
+
+Sweep in the sketch is **15° → 165°** and back. The UI maps 0° to the right, 90° up, 180° to the left — same convention as the classic Processing radar sketches.
+
+Distance `0` means no echo (timeout / out of range). A blip is only drawn when the reading is between 0 and the range scale you picked.
+
+---
+
+## Flash the Arduino
+
+1. Wire it like the table above.
+2. Open `arduino/radar.ino` in the Arduino IDE.
+3. Board: **Arduino Uno**. Port: whatever COM / `/dev/tty…` showed up.
+4. Upload. Serial is **9600 baud**.
+
+The sketch prints one packet per ping:
+
+```
+90,42.
+```
+
+That is `angle,distance.` — the HowToMechatronics-style line. The site also accepts:
+
+```
+90,42
+90;42
+{"angle":90,"distance":42}
+angle:90 distance:42
+```
+
+---
+
+## Run the site locally
+
+Need [Node.js](https://nodejs.org/) and [pnpm](https://pnpm.io/).
 
 ```bash
+git clone https://github.com/Wasteof-time/radar-practically.git
+cd radar-practically
 pnpm install
 pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
 
-Chrome or Edge is required for **Connect Arduino** (Web Serial). Safari / Firefox can still run the demo sweep.
-
-## Arduino
-
-1. Wire a servo + HC-SR04 as in `arduino/radar.ino` (servo D12, TRIG D10, ECHO D11).
-2. Flash that sketch (9600 baud).
-3. On the site: pick **9600**, click **Connect Arduino**, choose the COM port.
-
-### Serial format
-
-One packet per ping:
-
-```
-90,42.
+```bash
+pnpm build && pnpm start   # production locally
 ```
 
-That’s `angle,distance.` — the classic tutorial format. Newline-terminated `90,42` and JSON `{"angle":90,"distance":42}` also work.
+The public build lives on Netlify at [sonar-rc.netlify.app](https://sonar-rc.netlify.app).
 
-`0` distance means no echo (out of range). The radar only draws a blip when distance is between 0 and the range scale (40 / 100 / 200 / 400 cm).
+---
 
-0° is the right side of the screen, 90° is up, 180° is left — matching the usual Processing radar sketch.
+## Hook the board to the page
+
+1. Plug in the Uno.
+2. On the site: baud **9600**, click **Connect Arduino**, pick the port.
+3. Demo turns off by itself when serial pings start landing.
+4. **Clear traces** wipes old blips. **Disconnect** when you are done.
+
+If Web Serial is missing, the page tells you. Demo still runs.
+
+---
+
+## Repo map
+
+```
+app/components/RadarCanvas.tsx      canvas sweep + traces
+app/components/RadarPlayground.tsx  UI, demo loop, serial wiring
+lib/parseRadar.ts                   serial packet parser
+lib/radar.ts                        frame, bins, demo room
+lib/useSerialRadar.ts               Web Serial hook
+arduino/radar.ino                   Uno + servo + HC-SR04
+```
+
+---
+
+## Club notes
+
+This is a workshop toy, not a ranging instrument. HC-SR04 lies in weird rooms, at angles, and on soft surfaces. Use it to learn the loop (move → ping → print → draw), then go flex on whoever is still stuck in the serial monitor.
+
+Issues and PRs are fine if you actually ran it.
+
+**wasteof-time (JCKAWIN)** · Robotics Club VITC

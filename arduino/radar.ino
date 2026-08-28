@@ -1,8 +1,8 @@
 /*
-  Radar Playground — Arduino sketch
+  Sonar Playground — Arduino sketch
   Robotics Club VITC
 
-  Hardware (same pinout as the classic ultrasonic radar tutorials):
+  Hardware (same pinout as the classic ultrasonic sonar tutorials):
     Servo signal  -> D12
     HC-SR04 TRIG  -> D10
     HC-SR04 ECHO  -> D11
@@ -12,7 +12,7 @@
       angle,distance.
     example:  90,42.
 
-  The website reads that over Web Serial and draws the radar.
+  The website reads that over Web Serial and draws the sonar.
 */
 
 #include <Servo.h>
@@ -21,10 +21,11 @@ const int TRIG_PIN = 10;
 const int ECHO_PIN = 11;
 const int SERVO_PIN = 12;
 
-const int ANGLE_MIN = 15;
-const int ANGLE_MAX = 165;
-const int STEP_MS = 30;      // delay between steps (ms)
-const int MAX_CM = 200;      // treat farther / timeout as no echo
+const int ANGLE_MIN = 0;
+const int ANGLE_MAX = 180;
+const int STEP_MS = 30;      
+const int MAX_CM = 200;      
+const int SPEED_OF_SOUND_MS = 0.0343;
 
 Servo radarServo;
 
@@ -35,9 +36,9 @@ long readDistanceCm() {
   delayMicroseconds(10);
   digitalWrite(TRIG_PIN, LOW);
 
-  unsigned long duration = pulseIn(ECHO_PIN, HIGH, 25000); // ~4 m timeout
+  unsigned long duration = pulseIn(ECHO_PIN, HIGH, 25000); 
   if (duration == 0) return 0;
-  long cm = duration * 0.0343 / 2.0;
+  long cm = duration * SPEED_OF_SOUND_MS / 2.0;
   if (cm <= 0 || cm > MAX_CM) return 0;
   return cm;
 }

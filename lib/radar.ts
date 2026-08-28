@@ -60,19 +60,26 @@ export function applyPing(
   }
 }
 
-export function countObjects(frame: RadarFrame, maxRange: number, now: number) {
-  const FRESH_MS = 4000;
-  let n = 0;
+/** How long a blip stays “live” on the sweep (ms). */
+export const FRESH_MS = 4000;
+
+/** Closest in-range echo still on the phosphor trail, or null if none. */
+export function nearestContact(
+  frame: RadarFrame,
+  maxRange: number,
+  now: number,
+): { angle: number; distance: number } | null {
+  let best = Infinity;
+  let bestAngle = 0;
   for (let i = 0; i < BIN_COUNT; i++) {
-    if (
-      frame.dist[i] > 0 &&
-      frame.dist[i] <= maxRange &&
-      now - frame.hitAt[i] < FRESH_MS
-    ) {
-      n += 1;
+    const d = frame.dist[i];
+    if (d > 0 && d <= maxRange && now - frame.hitAt[i] < FRESH_MS && d < best) {
+      best = d;
+      bestAngle = i + ANGLE_MIN;
     }
   }
-  return n;
+  if (!Number.isFinite(best) || best === Infinity) return null;
+  return { angle: bestAngle, distance: best };
 }
 
 export function clamp(n: number, lo: number, hi: number) {
