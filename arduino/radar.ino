@@ -25,7 +25,7 @@ const int ANGLE_MIN = 0;
 const int ANGLE_MAX = 180;
 const int STEP_MS = 30;      
 const int MAX_CM = 200;      
-const int SPEED_OF_SOUND_MS = 0.0343;
+const float SPEED_OF_SOUND_MS = 0.0343;
 
 Servo radarServo;
 
